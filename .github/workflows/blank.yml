@@ -1,0 +1,51 @@
+
+name: MH Stories 2 Mod Tool
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+
+jobs:
+  inspect-project:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Baixar arquivos do repositorio
+        uses: actions/checkout@v4
+
+      - name: Preparar ambiente
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y unzip
+
+      - name: Procurar e verificar o ZIP
+        run: |
+          echo "Arquivos encontrados:"
+          find . -maxdepth 3 -type f
+
+          ZIP=$(find . -maxdepth 3 -type f \
+            -iname "MonsterHunterStories2ModTool_Prototype.zip" \
+            | head -n 1)
+
+          if [ -z "$ZIP" ]; then
+            echo "ZIP do projeto nao encontrado."
+            exit 1
+          fi
+
+          echo "Verificando: $ZIP"
+          unzip -t "$ZIP"
+
+          mkdir -p extracted
+          unzip -o "$ZIP" -d extracted
+
+          echo "Estrutura do projeto:"
+          find extracted -maxdepth 4 -type f | head -200
+
+          if find extracted -name gradlew -type f | grep -q .; then
+            echo "Encontrado um projeto com Gradle Wrapper."
+          elif find extracted -name build.gradle -o -name build.gradle.kts | grep -q .; then
+            echo "Encontrados arquivos de configuracao Gradle."
+          else
+            echo "Nao foi identificado um projeto Android Gradle convencional."
+          fi
