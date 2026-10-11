@@ -24,9 +24,7 @@ jobs:
           echo "Arquivos encontrados:"
           find . -maxdepth 3 -type f
 
-          ZIP=$(find . -maxdepth 3 -type f \
-            -iname "MonsterHunterStories2ModTool_Prototype.zip" \
-            | head -n 1)
+          ZIP=$(find . -type f -iname "*.zip" | head -n 1)
 
           if [ -z "$ZIP" ]; then
             echo "ZIP do projeto nao encontrado."
