@@ -95,7 +95,14 @@ jobs:
           p.write_text(s)
           print("Configuração verificada:", p)
           PY
-
+          
+      - name: Build APK
+        shell: bash
+        run: |
+          set -e
+          cd "$PROJECT_DIR"
+          gradle assembleDebug
+          
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
