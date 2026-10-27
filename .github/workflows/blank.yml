@@ -63,38 +63,24 @@ jobs:
           gradle-version: '8.9'
 
       
+     
       - name: Configure Java and Kotlin targets
         shell: bash
         run: |
           set -e
-          FILE="$PROJECT_DIR/app/build.gradle.kts"
 
-          if [ ! -f "$FILE" ]; then
-            echo "Arquivo app/build.gradle.kts não encontrado."
-            find "$PROJECT_DIR" -maxdepth 4 -name "build.gradle*"
-            exit 1
-          fi
+          find "$PROJECT_DIR" -type f \( -name "*.gradle" -o -name "*.gradle.kts" \) -print0 | while IFS= read -r -d '' FILE; do
+            sed -i \
+              -e 's/JavaVersion.VERSION_1_8/JavaVersion.VERSION_17/g' \
+              -e 's/JavaVersion.VERSION_1_8/JavaVersion.VERSION_17/g' \
+              -e 's/jvmTarget = "1\.8"/jvmTarget = "17"/g' \
+              -e "s/jvmTarget = '1\.8'/jvmTarget = '17'/g" \
+              "$FILE"
+          done
 
-          python3 - "$FILE" <<'PY'
-          import sys
-          from pathlib import Path
+          echo "Verificando configurações:"
+          grep -R -n -E 'VERSION_1_8|jvmTarget.*1\.8' "$PROJECT_DIR" --include="*.gradle" --include="*.gradle.kts" || true
 
-          p = Path(sys.argv[1])
-          s = p.read_text()
-
-          s = s.replace(
-              "JavaVersion.VERSION_1_8",
-              "JavaVersion.VERSION_17"
-          )
-
-          s = s.replace(
-              'jvmTarget = "1.8"',
-              'jvmTarget = "17"'
-          )
-
-          p.write_text(s)
-          print("Configuração verificada:", p)
-          PY
           
       - name: Build APK
         shell: bash
