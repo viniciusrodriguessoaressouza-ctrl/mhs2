@@ -63,19 +63,24 @@ jobs:
           gradle-version: '8.9'
 
       
-     
-      - name: Configure Java and Kotlin targets
+      - name: Fix JVM target
         shell: bash
         run: |
-          set -e
+          cat >> "$PROJECT_DIR/app/build.gradle.kts" <<'EOF'
 
-          find "$PROJECT_DIR" -type f \( -name "*.gradle" -o -name "*.gradle.kts" \) -print0 | while IFS= read -r -d '' FILE; do
-            sed -i \
-              -e 's/JavaVersion.VERSION_1_8/JavaVersion.VERSION_17/g' \
-              -e 's/JavaVersion.VERSION_1_8/JavaVersion.VERSION_17/g' \
-              -e 's/jvmTarget = "1\.8"/jvmTarget = "17"/g' \
-              -e "s/jvmTarget = '1\.8'/jvmTarget = '17'/g" \
-              "$FILE"
+          android {
+              compileOptions {
+                  sourceCompatibility = JavaVersion.VERSION_17
+                  targetCompatibility = JavaVersion.VERSION_17
+              }
+          }
+
+          kotlin {
+              compilerOptions {
+                  jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
+              }
+          }
+          EOF
           done
 
           echo "Verificando configurações:"
